@@ -1,13 +1,13 @@
-import { UserController } from "./UserController";
-import { UserService } from '../services/UserService'
-import { Request } from 'express'
-import { makeMockResponse } from "../__mocks__/mockResponse.mock";
+import {UserController} from "./UserController";
+import {UserService} from '../services/UserService'
+import {Request} from 'express'
+import {makeMockResponse} from "../__mocks__/mockResponse.mock";
 
 describe('UserController', () => {
     const mockUserService: Partial<UserService> = {
         createUser: jest.fn()
     }
-    
+
     const userController = new UserController(mockUserService as UserService);
 
     it('Deve adicionar um novo usuário', () => {
@@ -20,6 +20,26 @@ describe('UserController', () => {
         const mockResponse = makeMockResponse()
         userController.createUser(mockRequest, mockResponse)
         expect(mockResponse.state.status).toBe(201)
-        expect(mockResponse.state.json).toMatchObject({ message: 'Usuário criado' })
+        expect(mockResponse.state.json).toMatchObject({message: 'Usuário criado'})
+    })
+
+    it('Deve retornar erro se o nome não for informado', () => {
+        const mockRequest = {
+            body: {
+                email: 'user@test.com'
+            }
+        } as Request
+        const mockResponse = makeMockResponse()
+        userController.createUser(mockRequest, mockResponse)
+        expect(mockResponse.state.status).toBe(400)
+        expect(mockResponse.state.json).toMatchObject({message: 'O nome é obrigatório'})
+    })
+
+    it('Deve chamar a função getAllUsers', () => {
+        mockUserService.getAllUsers = jest.fn();
+        userController.getAllUsers({} as Request,
+            {status: jest.fn(), json: jest.fn()} as any,
+        );
+        expect(mockUserService.getAllUsers).toHaveBeenCalled();
     })
 })
